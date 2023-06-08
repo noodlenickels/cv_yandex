@@ -1,4 +1,3 @@
-let coordinates = [55.7229780, 37.4007218];
 let region = [];
 
 async function get_traffic_light_coordinates(address)
@@ -12,6 +11,52 @@ async function get_traffic_light_coordinates(address)
   }
 };
 
+function createPanorama(coordinates)
+{
+  // Для начала проверим, поддерживает ли плеер браузер пользователя.
+  if (!ymaps.panorama.isSupported()) {
+    // Если нет, то просто ничего не будем делать.
+    return;
+  }
+
+  // Ищем панораму в переданной точке.
+  ymaps.panorama.locate(coordinates).done(
+    function (panoramas) {
+      // Убеждаемся, что найдена хотя бы одна панорама.
+      if (panoramas.length > 0) {
+        // Создаем плеер с одной из полученных панорам.
+        var player = new ymaps.panorama.Player(
+          'map',
+          // Панорамы в ответе отсортированы по расстоянию
+          // от переданной в panorama.locate точки. Выбираем первую,
+          // она будет ближайшей.
+          panoramas[0],
+          // Зададим направление взгляда, отличное от значения
+          // по умолчанию.
+          { direction: [256, 16] }
+        );
+      }
+    },
+    function (error) {
+      // Если что-то пошло не так, сообщим об этом пользователю.
+      alert(error.message);
+    }
+  );
+
+  // // Для добавления панорамы на страницу также можно воспользоваться
+  // // методом panorama.createPlayer. Этот метод ищет ближайщую панораму и
+  // // в случае успеха создает плеер с найденной панорамой.
+  // ymaps.panorama.createPlayer(
+  //   'map',
+  //   [59.938557, 30.316198],
+  //   // Ищем воздушную панораму.
+  //   { layer: 'yandex#airPanorama' }
+  // )
+  //   .done(function (player) {
+  //     // player – это ссылка на экземпляр плеера.
+  //   });
+};
+
 function init () {
   var myMap = new ymaps.Map("map", {
       center: [region[0]?.lat, region[0]?.lon],
@@ -19,29 +64,31 @@ function init () {
     }, {
       searchControlProvider: 'yandex#search'
     });
+
     for (let i = 0; i < region.length; i++) {
       console.log(region[i])
     var myPlacemark = new ymaps.Placemark([region[i]?.lat, region[i]?.lon], {
       // Чтобы балун и хинт открывались на метке, необходимо задать ей определенные свойства.
-      balloonContentHeader: "Балун метки",
-      balloonContentBody: "Содержимое <em>балуна</em> метки",
-      balloonContentFooter: "Светофор",
-      hintContent: "Хинт метки"
+      balloonContentFooter: `${[region[i]?.lat, region[i]?.lon]}`,
+      hintContent: "Светофор"
     });
 
     myMap.geoObjects.add(myPlacemark);
+    createPanorama([region[i]?.lat, region[i]?.lon])
     }
+
+  const signals = document.getElementById("but");
+  signals.innerHTML = `Количество светофоров: ${region.length}`;
+}
+
+function hide(what) {
+  const obj = document.getElementById(`${what}`);
+  obj.style.display = 'none';
 }
 
 
-// function init() {
-//   var myMap = new ymaps.Map('map', {
-//     center: coordinates,
-//     zoom: 21,
-//     controls: []
-//   });
-// }
-
 get_traffic_light_coordinates('Ленинградский проспект');
+
+
 
 
