@@ -14,8 +14,9 @@
     </style>
 </head>
 <body>
+<input type="file" onchange="readFile(this)">
 <div id="but" class="divide">Количество светофоров: 0</div>
-<!--<button id="panorama" class="divide">Показать панораму</button>-->
+<button onclick="saveImg()">Скачать все панорамы</button>
 <div id="map"></div>
 </body>
 <script src="https://api-maps.yandex.ru/2.1?lang=ru_RU&apikey=a1aa741d-d2fb-479e-bdd6-e3bf79676f9a" type="text/javascript"></script>
